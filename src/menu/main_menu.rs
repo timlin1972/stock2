@@ -11,12 +11,13 @@ fn print_line() {
 pub async fn main_menu(data: &mut Data) {
     loop {
         println!("Main Menu");
-        println!("每日工作: 1");
+        println!("每日工作: 1/4/5/6");
         println!("1. 抓 2026 全部股票資料");
         println!("2. 抓 年度個股股票資料");
         println!("3. 單日長紅 K 棒");
         println!("4. 單日十字線");
-        println!("5. 單日 MACD 黃金交叉且大成交量");
+        println!("5. 單日陽吞噬形態");
+        println!("6. 單日 MACD 黃金交叉且大成交量");
         println!("q/e. 退出 (Quit/Exit)");
         println!("請輸入選項：");
 
@@ -31,7 +32,8 @@ pub async fn main_menu(data: &mut Data) {
             "2" => menu_fetch_data_company(data).await,
             "3" => menu_long_red_candle_date(data),
             "4" => menu_doji_date(data),
-            "5" => menu_macd_golden_cross_date(data),
+            "5" => menu_bullish_engulfing_date(data),
+            "6" => menu_macd_golden_cross_date(data),
             "q" | "e" => {
                 println!("退出程式");
                 break;
@@ -167,5 +169,41 @@ fn menu_macd_golden_cross_date(data: &Data) {
         );
     }
 
+    print_line();
+}
+
+fn menu_bullish_engulfing_date(data: &Data) {
+    println!("請輸入日期 (YYYYMMDD):");
+    let mut input_date = String::new();
+    io::stdin().read_line(&mut input_date).expect("讀取失敗");
+    let input_date = input_date.trim();
+
+    let results = scripts::bullish_engulfing::find_bullish_engulfing_date(data, input_date);
+
+    print_line();
+
+    println!(
+        "總共有 {} 支股票在 {} 是 陽吞噬形態",
+        results.len(),
+        input_date
+    );
+    println!(
+        "{:<9}{:<5}{:>6}{:>6}{:>6}{:>6}{:>6}{:>6}  公司名稱",
+        "日期", "台股", "成交張數", "開盤價", "收盤價", "最高價", "最低價", "漲跌",
+    );
+    for result in results {
+        println!(
+            "{:<11}{:<6}{:>10}{:>9.2}{:>9.2}{:>9.2}{:>9.2}{:>9.2}  {:<20}",
+            result.stock_data.date,
+            result.stock_no,
+            common::str_volume(result.stock_data.volume),
+            result.stock_data.open,
+            result.stock_data.close,
+            result.stock_data.high,
+            result.stock_data.low,
+            result.stock_data.change,
+            data.company_map.get_name(&result.stock_no),
+        );
+    }
     print_line();
 }
