@@ -5,8 +5,8 @@ pub enum CandlestickType {
     LongRedCandle,
     LongGreenCandle,
     Doji,
-    // Hammer,
-    // InvertedHammer,
+    LongLowerShadow,
+    LongUpperShadow,
     // ShootingStar,
     // SpinningTop,
     Unknown,
@@ -19,8 +19,8 @@ pub fn anal_candlestick(stock_data: &StockData) -> CandlestickType {
     let low = stock_data.low;
 
     let body_length = (close - open).abs();
-    // let upper_shadow = high - open.max(close);
-    // let lower_shadow = open.min(close) - low;
+    let upper_shadow = high - open.max(close);
+    let lower_shadow = open.min(close) - low;
 
     if body_length > 0.05 * close {
         if close > open {
@@ -35,12 +35,13 @@ pub fn anal_candlestick(stock_data: &StockData) -> CandlestickType {
         && close != low
     {
         CandlestickType::Doji
+    } else if lower_shadow > 0.05 * close {
+        CandlestickType::LongLowerShadow
+    } else if upper_shadow > 0.05 * close {
+        CandlestickType::LongUpperShadow
     }
-    /* else if lower_shadow > 2.0 * body_length && upper_shadow < 0.1 * body_length {
-        CandlestickType::Hammer
-    } else if upper_shadow > 2.0 * body_length && lower_shadow < 0.1 * body_length {
-        CandlestickType::InvertedHammer
-    } else if upper_shadow > 2.0 * body_length && lower_shadow > 2.0 * body_length {
+    /*
+    else if upper_shadow > 2.0 * body_length && lower_shadow > 2.0 * body_length {
         CandlestickType::ShootingStar
     } else {
         CandlestickType::SpinningTop
