@@ -7,6 +7,7 @@ pub enum CandlestickType {
     Doji,
     LongLowerShadow,
     LongUpperShadow,
+    HangingMan,
     // ShootingStar,
     // SpinningTop,
     Unknown,
@@ -39,6 +40,8 @@ pub fn anal_candlestick(stock_data: &StockData) -> CandlestickType {
         CandlestickType::LongLowerShadow
     } else if upper_shadow > 0.05 * close {
         CandlestickType::LongUpperShadow
+    } else if lower_shadow > 2.0 * body_length && close == high {
+        CandlestickType::HangingMan
     }
     /*
     else if upper_shadow > 2.0 * body_length && lower_shadow > 2.0 * body_length {
@@ -50,4 +53,8 @@ pub fn anal_candlestick(stock_data: &StockData) -> CandlestickType {
     else {
         CandlestickType::Unknown
     }
+}
+
+pub fn anal_limit_up(prev_stock_data: &StockData, curr_stock_data: &StockData) -> bool {
+    curr_stock_data.close >= (prev_stock_data.close * 1.1).round()
 }

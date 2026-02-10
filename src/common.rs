@@ -3,6 +3,11 @@ pub fn convert_date_to_fugle_format(date: &str) -> String {
     format!("{}-{}-{}", &date[0..4], &date[4..6], &date[6..8])
 }
 
+pub fn convert_fugle_date_to_yyyymmdd(date: &str) -> String {
+    // Convert date from "YYYY-MM-DD" to "YYYYMMDD"
+    date.replace("-", "")
+}
+
 fn format_commas(value: u64) -> String {
     let s = value.to_string();
     let bytes = s.as_bytes();
