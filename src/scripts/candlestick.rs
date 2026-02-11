@@ -77,6 +77,7 @@ pub fn find_doji_date_range_max_min(data: &Data, date: &str) -> Vec<StockDataWit
     doji_data_all
 }
 
+#[allow(dead_code)]
 pub fn find_lower_shadow_date(data: &Data, date: &str) -> Vec<StockDataWithNo> {
     println!("[{MODULE_NAME}] 分析 {date} 的長下影線");
 
@@ -107,6 +108,7 @@ pub fn find_lower_shadow_date(data: &Data, date: &str) -> Vec<StockDataWithNo> {
     result
 }
 
+#[allow(dead_code)]
 pub fn find_hanging_man_date(data: &Data, date: &str) -> Vec<StockDataWithNo> {
     println!("[{MODULE_NAME}] 分析 {date} 的吊人線");
 

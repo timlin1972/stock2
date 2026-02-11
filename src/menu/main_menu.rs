@@ -27,6 +27,7 @@ pub async fn main_menu(data: &mut Data) {
         println!("5. 單日陽吞噬形態");
         println!("6. 單日 MACD 黃金交叉且大成交量");
         println!("7. 複合條件: 單日吊人線且前兩天都是漲停");
+        println!("8. 烏雲罩頂");
         println!("q/e. 退出 (Quit/Exit)");
         println!("請輸入選項：");
 
@@ -44,6 +45,7 @@ pub async fn main_menu(data: &mut Data) {
             "5" => menu_bullish_engulfing_date(data),
             "6" => menu_macd_golden_cross_date(data),
             "7" => menu_complex_hanging_man_date(data),
+            "8" => menu_dark_cloud_cover_date(data),
             "q" | "e" => {
                 println!("退出程式");
                 break;
@@ -253,6 +255,41 @@ fn menu_complex_hanging_man_date(data: &Data) {
             result.stock_data.high,
             result.stock_data.low,
             result.stock_data.change,
+            data.company_map.get_name(&result.stock_no),
+        );
+    }
+    print_line();
+}
+
+fn menu_dark_cloud_cover_date(data: &Data) {
+    println!("請輸入日期 (YYYYMMDD):");
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("讀取失敗");
+    let mut input = input.trim().to_string();
+    if input.is_empty() {
+        input = get_today_date();
+        println!("使用今天的日期: {input}");
+    }
+
+    print_line();
+    let results = scripts::complex::find_complex_dark_cloud_cover(data, &input);
+    println!(
+        "總共有 {} 支股票在 {} 是 複合條件: 單日黑雲壓頂",
+        results.len(),
+        input
+    );
+    println!(
+        "{:<9}{:<5}{:>6}{:>6}{:>8}  公司名稱",
+        "日期", "台股", "成交張數", "收盤價", "-30%",
+    );
+    for result in results {
+        println!(
+            "{:<11}{:<6}{:>10}{:>9.2}{:>9.2}  {:<20}",
+            result.stock_data.date,
+            result.stock_no,
+            common::str_volume(result.stock_data.volume),
+            result.stock_data.close,
+            result.stock_data.close * 0.7,
             data.company_map.get_name(&result.stock_no),
         );
     }

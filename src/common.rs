@@ -3,6 +3,7 @@ pub fn convert_date_to_fugle_format(date: &str) -> String {
     format!("{}-{}-{}", &date[0..4], &date[4..6], &date[6..8])
 }
 
+#[allow(dead_code)]
 pub fn convert_fugle_date_to_yyyymmdd(date: &str) -> String {
     // Convert date from "YYYY-MM-DD" to "YYYYMMDD"
     date.replace("-", "")
@@ -24,4 +25,11 @@ fn format_commas(value: u64) -> String {
 
 pub fn str_volume(volume: u64) -> String {
     format_commas((volume as f64 / 1000.0) as u64)
+}
+
+use crate::stocks::data::Data;
+use crate::stocks::data_company::DataCompany;
+
+pub fn get_company_data<'a>(data: &'a Data, stock_no: &str) -> &'a DataCompany {
+    data.data_company.get(stock_no).expect("找不到股票資料")
 }
