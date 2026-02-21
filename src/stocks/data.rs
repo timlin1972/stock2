@@ -40,14 +40,14 @@ impl Data {
         let total = self.data_company.len();
         for data_company in self.data_company.values_mut() {
             println!(
-                "[{MODULE_NAME}] [{index}/{total}] Fetching and writing data for stock: {} ({})...",
+                "[{MODULE_NAME}] [{index}/{total}] Fetching and writing data year({year}) for stock: {} ({})...",
                 data_company.stock_no,
                 self.company_map.get_name(&data_company.stock_no)
             );
             data_company.fetch_year(&self.cfg, year).await;
 
-            // sleep 1 second to avoid hitting API rate limits
-            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            // sleep to avoid hitting API rate limits
+            tokio::time::sleep(std::time::Duration::from_millis(950)).await;
             index += 1;
         }
     }

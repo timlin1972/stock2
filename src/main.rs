@@ -1,6 +1,7 @@
 mod analysis;
 mod cfg;
 mod common;
+mod consts;
 mod fugle;
 mod menu;
 mod scripts;
