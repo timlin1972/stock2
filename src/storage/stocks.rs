@@ -2,12 +2,11 @@ use std::fs;
 use std::fs::File;
 use std::io::BufWriter;
 
+use crate::consts;
 use crate::stocks::data_company::StockData;
 
 const MODULE_NAME: &str = "storage::stocks";
 const DATA_DIR: &str = "data";
-const YEAR_FROM: i32 = 2025;
-const YEAR_TO: i32 = 2026;
 
 pub fn save(stock_no: &str, year: &str, data: &Vec<StockData>) {
     let data_company_dir = format!("{DATA_DIR}/{stock_no}");
@@ -26,7 +25,7 @@ pub fn save(stock_no: &str, year: &str, data: &Vec<StockData>) {
 
 pub fn read(stock_no: &str) -> Vec<StockData> {
     let mut stock_data = Vec::new();
-    for year in YEAR_FROM..=YEAR_TO {
+    for year in consts::YEAR_FROM..=consts::YEAR_TO {
         let data_company_file = format!("{DATA_DIR}/{stock_no}/{year}.json");
         // println!("[{MODULE_NAME}] Reading data from {data_company_file}");
         if fs::metadata(&data_company_file).is_ok() {

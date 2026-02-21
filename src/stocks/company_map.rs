@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use crate::twse;
 
 const MODULE_NAME: &str = "stocks::company_map";
-const IGNORE_STOCKS_FILE: &str = "ignore_stocks.txt";
 const COMPANY_MAP: &str = "company_map.json";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,9 +28,7 @@ pub struct CompanyMap {
 impl CompanyMap {
     pub async fn new() -> Self {
         let industry_map = build_industry_map();
-        let ignore_stocks = read_lines_to_vec(IGNORE_STOCKS_FILE).unwrap();
-
-        let stock_map = get_company_map(&ignore_stocks).await;
+        let stock_map = get_company_map().await;
 
         CompanyMap {
             stock_map,
@@ -60,25 +57,6 @@ impl CompanyMap {
 
         panic!("[{MODULE_NAME}] Cannot find company name for stock no: {stock_no}");
     }
-}
-
-fn read_lines_to_vec<P>(filename: P) -> io::Result<Vec<String>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    let reader = io::BufReader::new(file);
-
-    let mut result = Vec::new();
-
-    for l in reader.lines().map_while(Result::ok) {
-        // 如果有註解，用 "//" 切開，只取前半段
-        let clean = l.split("//").next().unwrap().trim();
-        if !clean.is_empty() {
-            result.push(clean.to_string());
-        }
-    }
-    Ok(result)
 }
 
 fn build_industry_map() -> HashMap<String, String> {
@@ -129,7 +107,7 @@ fn build_industry_map() -> HashMap<String, String> {
         .collect()
 }
 
-async fn get_company_map(ignore_stocks: &[String]) -> Vec<CompanyInfo> {
+async fn get_company_map() -> Vec<CompanyInfo> {
     // if the company map JSON file already exists, read from it instead of fetching from the API
     let mut save_map = false;
     let mut stock_map = if Path::new(COMPANY_MAP).exists() {
@@ -144,8 +122,8 @@ async fn get_company_map(ignore_stocks: &[String]) -> Vec<CompanyInfo> {
 
     // 過濾掉不需要的股票
     stock_map.retain(|company| {
-        // skip 金融保險業 and stocks in the ignore list
-        !ignore_stocks.contains(&company.stock_no) && company.industry != "17"
+        // skip 金融保險業
+        company.industry != "17"
     });
 
     stock_map.sort_by(|a, b| a.stock_no.cmp(&b.stock_no));
