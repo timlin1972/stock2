@@ -3,14 +3,15 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::twse;
 
 const MODULE_NAME: &str = "stocks::company_map";
 const IGNORE_STOCKS_FILE: &str = "ignore_stocks.txt";
+const COMPANY_MAP: &str = "company_map.json";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CompanyInfo {
     #[serde(rename = "公司代號")]
     pub stock_no: String,
@@ -29,8 +30,8 @@ impl CompanyMap {
     pub async fn new() -> Self {
         let industry_map = build_industry_map();
         let ignore_stocks = read_lines_to_vec(IGNORE_STOCKS_FILE).unwrap();
-        let mut stock_map = twse::company_map::fetch(&ignore_stocks).await.unwrap();
-        stock_map.sort_by(|a, b| a.stock_no.cmp(&b.stock_no));
+
+        let stock_map = get_company_map(&ignore_stocks).await;
 
         CompanyMap {
             stock_map,
@@ -126,4 +127,34 @@ fn build_industry_map() -> HashMap<String, String> {
         .into_iter()
         .map(|(code, name)| (code.to_string(), name.to_string()))
         .collect()
+}
+
+async fn get_company_map(ignore_stocks: &[String]) -> Vec<CompanyInfo> {
+    // if the company map JSON file already exists, read from it instead of fetching from the API
+    let mut save_map = false;
+    let mut stock_map = if Path::new(COMPANY_MAP).exists() {
+        let file = File::open(COMPANY_MAP).unwrap();
+        let reader = io::BufReader::new(file);
+        let stock_map: Vec<CompanyInfo> = serde_json::from_reader(reader).unwrap();
+        stock_map
+    } else {
+        save_map = true;
+        twse::company_map::fetch().await.unwrap()
+    };
+
+    // 過濾掉不需要的股票
+    stock_map.retain(|company| {
+        // skip 金融保險業 and stocks in the ignore list
+        !ignore_stocks.contains(&company.stock_no) && company.industry != "17"
+    });
+
+    stock_map.sort_by(|a, b| a.stock_no.cmp(&b.stock_no));
+
+    // Save the company map to a JSON file for future use
+    if save_map {
+        let json = serde_json::to_string_pretty(&stock_map).unwrap();
+        std::fs::write(COMPANY_MAP, json).unwrap();
+    }
+
+    stock_map
 }
