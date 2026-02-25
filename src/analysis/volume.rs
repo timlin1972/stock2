@@ -39,11 +39,11 @@ pub fn find_max_min_date_range_company(
 
     for i in start_index..=curr_index {
         let data = &data_company.stock_data[i];
-        if data.high > max_price {
-            max_price = data.high;
+        if data.close > max_price {
+            max_price = data.close;
         }
-        if data.low < min_price {
-            min_price = data.low;
+        if data.close < min_price {
+            min_price = data.close;
         }
     }
 

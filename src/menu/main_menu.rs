@@ -160,7 +160,7 @@ fn menu_complex_hanging_man_date(data: &Data) {
     common::print_line();
     let results = scripts::complex::find_complex_hanging_man_date(data, &input);
     println!(
-        "總共有 {} 支股票在 {input} 是 複合條件: 單日吊人線且前兩天都是漲停",
+        "總共有 {} 支股票在 {input} 是 複合條件: 單日吊人線且前兩天都是漲停或一根漲停+當天是漲停且吊人線",
         results.len(),
     );
     print_detail_list(data, &results);
