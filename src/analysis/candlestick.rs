@@ -54,7 +54,3 @@ pub fn anal_candlestick(stock_data: &StockData) -> CandlestickType {
         CandlestickType::Unknown
     }
 }
-
-pub fn anal_limit_up(prev_stock_data: &StockData, curr_stock_data: &StockData) -> bool {
-    curr_stock_data.close >= (prev_stock_data.close * 1.1).floor()
-}
